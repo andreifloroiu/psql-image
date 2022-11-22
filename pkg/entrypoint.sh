@@ -3,9 +3,8 @@ set -e
 
 if [ -z "$PSQL_CONNECTION_STRING" ]
 then
-    echo "Empty psql connection string"
-    psql --help
-    exit 0
+    echo "No psql connection string provided!"
+    exit 1
 fi
 if [ -z "$PSQL_SCRIPT" ]
 then
