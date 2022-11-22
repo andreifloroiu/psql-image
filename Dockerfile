@@ -6,4 +6,4 @@ WORKDIR /psql
 
 COPY pkg/entrypoint.sh /psql/
 
-RUN [ "/bin/sh", "entrypoint.sh", "world"]
+ENTRYPOINT [ "/bin/sh", "entrypoint.sh", "world" ]
