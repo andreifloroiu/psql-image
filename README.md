@@ -10,10 +10,8 @@ PostgreSQL interactive terminal Docker image with ```psql```.
 docker build . -t psql:latest
 ```
 
-### ARMv7
+### Other architecture
 
 ```bash
-docker buildx build .
-# or
 docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 --build-arg ALPINE_VERSION=latest . 
 ```
