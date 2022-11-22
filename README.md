@@ -1,0 +1,2 @@
+# psql
+PostgreSQL interactive terminal
