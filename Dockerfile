@@ -27,9 +27,4 @@ WORKDIR /psql
 
 COPY pkg/entrypoint.sh /psql/
 
-RUN groupadd -g 1000 psql
-RUN useradd -u 1000 -g psql -s /bin/sh -m psql
-RUN chown -R psql:psql /psql
-USER psql
-
 ENTRYPOINT [ "/bin/sh", "entrypoint.sh" ]
