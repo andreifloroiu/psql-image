@@ -42,7 +42,15 @@ docker build . -t psql:latest
 
 ### Other architectures (e.g. for Raspberry Pi)
 
-First, make sure you have installed
+First, make sure you can build for other architectures locally:
+
+```bash
+docker buildx create --name builder
+docker buildx use builder
+docker buildx inspect --bootstrap
+```
+
+Then, simply run the following:
 
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64,linux/386,linux/arm/v7,linux/arm/v6 --build-arg ALPINE_VERSION=latest -t greuceanu/psql:latest .
