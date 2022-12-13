@@ -1,6 +1,8 @@
 # psql
 
-PostgreSQL interactive terminal Docker image with ```psql```. This is the image source code for the [greuceanu/psql](https://hub.docker.com/r/greuceanu/psql) repository.
+A simple image to run PostgreSQL jobs for multiple architectures (including Raspberry Pi) using ```psql```, the PostgreSQL interactive terminal.
+
+This is the image source code for the [greuceanu/psql](https://hub.docker.com/r/greuceanu/psql) repository.
 
 ## Usage
 
@@ -10,7 +12,7 @@ Make use of the following environment variables:
 ## Single connection string - using this will ignore the rest of connection parameters
 ENV PSQL_CONNECTION_STRING=
 ## Default input script file name script.sh
-ENV PSQL_SCRIPT_FILE=script.sh
+ENV PSQL_SCRIPT_FILE=script.sql
 ## SQL string to execute instead of script file
 ENV PSQL_SCRIPT=
 ## DB host
@@ -38,7 +40,17 @@ Using ```PSQL_CONNECTION_STRING``` will ignore the other connection parameters: 
 docker build . -t psql:latest
 ```
 
-### Other architecture
+### Other architectures (e.g. for Raspberry Pi)
+
+First, make sure you can build for other architectures locally:
+
+```bash
+docker buildx create --name builder
+docker buildx use builder
+docker buildx inspect --bootstrap
+```
+
+Then, simply run the following:
 
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64,linux/386,linux/arm/v7,linux/arm/v6 --build-arg ALPINE_VERSION=latest -t greuceanu/psql:latest .
