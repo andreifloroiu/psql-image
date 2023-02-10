@@ -32,6 +32,53 @@ ENV PSQL_DBNAME=
 Using ```PSQL_CONNECTION_STRING``` will ignore the other connection parameters: ```PSQL_HOST```, ```PSQL_PORT```,
 ```PSQL_SSLMODE```, ```PSQL_USER```, ```PSQL_PASSWORD``` and ```PSQL_DBNAME```.
 
+### Examples
+
+#### PostgreSQL deployment in k8s
+
+The following example is highlighting use within Kubernetes deployment:
+
+```yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgsql
+  namespace: ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: pgsql
+  template:
+    metadata:
+      labels:
+        component: pgsql
+    spec:
+      containers:
+        - name: pgsql
+          image: postgres
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgsql
+                  key: PGPASSWORD
+---
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgsql
+  namespace: ns
+type: Opaque
+data:
+  PGPASSWORD: XXX
+```
+
 ## Building
 
 ### Local
