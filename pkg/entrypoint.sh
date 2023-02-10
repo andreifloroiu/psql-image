@@ -30,16 +30,18 @@ then
     fi
 fi
 
-if [ -z "$PSQL_SCRIPT" ]
+if [ ! -z "$PSQL_CONNECTION_STRING" ]
 then
-    if [ -z "$PSQL_SCRIPT_FILE" ]
+    if [ -z "$PSQL_SCRIPT" ]
     then
-        psql "$PSQL_CONNECTION_STRING" -f script.sql
-        exit 0
+        if [ -z "$PSQL_SCRIPT_FILE" ]
+        then
+            psql "$PSQL_CONNECTION_STRING" -f script.sql
+        else
+            psql "$PSQL_CONNECTION_STRING" -f $PSQL_SCRIPT_FILE
+        fi
+    else
+        psql "$PSQL_CONNECTION_STRING" -c "$PSQL_SCRIPT" \
+            || psql --help && exit 1
     fi
-    psql "$PSQL_CONNECTION_STRING" -f $PSQL_SCRIPT_FILE
-    exit 0
 fi
-
-psql "$PSQL_CONNECTION_STRING" -c "$PSQL_SCRIPT" \
-    || psql --help && exit 1
