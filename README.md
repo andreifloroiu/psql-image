@@ -6,32 +6,6 @@ This is the image source code for the [greuceanu/psql](https://hub.docker.com/r/
 
 ## Usage
 
-Make use of the following environment variables:
-
-```dockerfile
-## Single connection string - using this will ignore the rest of connection parameters
-ENV PSQL_CONNECTION_STRING=
-## Default input script file name script.sh
-ENV PSQL_SCRIPT_FILE=script.sql
-## SQL string to execute instead of script file
-ENV PSQL_SCRIPT=
-## DB host
-ENV PSQL_HOST=
-## DB post
-ENV PSQL_PORT=
-## DB SSL mode
-ENV PSQL_SSLMODE=prefer
-## DB user
-ENV PSQL_USER=
-## DB user password
-ENV PSQL_PASSWORD=
-## DB name
-ENV PSQL_DBNAME=
-```
-
-Using ```PSQL_CONNECTION_STRING``` will ignore the other connection parameters: ```PSQL_HOST```, ```PSQL_PORT```,
-```PSQL_SSLMODE```, ```PSQL_USER```, ```PSQL_PASSWORD``` and ```PSQL_DBNAME```.
-
 ### Examples
 
 #### Simple _psql_ call
@@ -40,64 +14,35 @@ Using ```PSQL_CONNECTION_STRING``` will ignore the other connection parameters: 
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: create-postgres-user
+  name: pgsql-init-sql
+  namespace: db
 spec:
   template:
     spec:
       containers:
-      - name: create-postgres-user
-        image: greuceanu/psql:latest
-        env:
-        - name: PGPASSWORD
-          value: mypassword
-        command: ["psql"]
-        args: ["-U", "postgres", "-c", "CREATE USER myuser WITH PASSWORD '$PGPASSWORD';"]
-      restartPolicy: Never
-```
-
-#### PostgreSQL deployment in k8s
-
-The following example is highlighting use within Kubernetes deployment:
-
-```yaml
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: pgsql
-  namespace: ns
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      component: pgsql
-  template:
-    metadata:
-      labels:
-        component: pgsql
-    spec:
-      containers:
-        - name: pgsql
-          image: postgres
-          ports:
-            - containerPort: 5432
+        - name: pgsql-init-sql
+          image: greuceanu/psql
           env:
-            - name: POSTGRES_PASSWORD
+            - name: PSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: pgsql
-                  key: PGPASSWORD
----
-###########
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: pgsql
-  namespace: ns
-type: Opaque
-data:
-  PGPASSWORD: XXX
+                  name: some-secret
+                  key: some-key
+            - name: NEW_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: some-secret
+                  key: some-other-key
+          command:
+            - sh
+            - -c
+            - |
+              psql "host=pgsql user=postgres password=$PSQL_PASSWORD" <<EOF
+              IF NOT EXISTS (SELECT * FROM pg_roles WHERE rolname='newuser') THEN
+                CREATE USER newuser WITH PASSWORD '$NEW_USER_PASSWORD';
+              END IF;
+      restartPolicy: Never
+  backoffLimit: 4
 ```
 
 ## Building
