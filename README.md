@@ -34,6 +34,27 @@ Using ```PSQL_CONNECTION_STRING``` will ignore the other connection parameters: 
 
 ### Examples
 
+#### Simple _psql_ call
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-postgres-user
+spec:
+  template:
+    spec:
+      containers:
+      - name: create-postgres-user
+        image: greuceanu/psql:latest
+        env:
+        - name: PGPASSWORD
+          value: mypassword
+        command: ["psql"]
+        args: ["-U", "postgres", "-c", "CREATE USER myuser WITH PASSWORD '$PGPASSWORD';"]
+      restartPolicy: Never
+```
+
 #### PostgreSQL deployment in k8s
 
 The following example is highlighting use within Kubernetes deployment:
@@ -67,7 +88,7 @@ spec:
                   name: pgsql
                   key: PGPASSWORD
 ---
-
+###########
 ---
 apiVersion: v1
 kind: Secret
