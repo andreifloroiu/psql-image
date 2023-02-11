@@ -26,7 +26,7 @@ then
     fi
     if [ ! -z "$PSQL_DBNAME" ]
     then
-        $PSQL_CONNECTION_STRING = "$PSQL_CONNECTION_STRING sslmode=$PSQL_DBNAME"
+        $PSQL_CONNECTION_STRING = "$PSQL_CONNECTION_STRING dbname=$PSQL_DBNAME"
     fi
 fi
 
