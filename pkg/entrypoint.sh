@@ -36,7 +36,7 @@ then
     then
         if [ -z "$PSQL_SCRIPT_FILE" ]
         then
-            psql "$PSQL_CONNECTION_STRING" -f script.sql
+            psql "$PSQL_CONNECTION_STRING" -f /psql/script.sql
         else
             psql "$PSQL_CONNECTION_STRING" -f $PSQL_SCRIPT_FILE
         fi
