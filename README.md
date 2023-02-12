@@ -1,36 +1,65 @@
 # psql
 
-A simple image to run PostgreSQL jobs for multiple architectures (including Raspberry Pi) using ```psql```, the PostgreSQL interactive terminal.
+A simple and lightweight image to run PostgreSQL jobs which can be build for multiple architectures
+(including for RaspberryPi) using ```psql``` - the PostgreSQL interactive terminal.
 
 This is the image source code for the [greuceanu/psql](https://hub.docker.com/r/greuceanu/psql) repository.
 
 ## Usage
 
-Make use of the following environment variables:
+As you want - don't forget to specify the command/entrypoint (check examples).
 
-```dockerfile
-## Single connection string - using this will ignore the rest of connection parameters
-ENV PSQL_CONNECTION_STRING=
-## Default input script file name script.sh
-ENV PSQL_SCRIPT_FILE=script.sql
-## SQL string to execute instead of script file
-ENV PSQL_SCRIPT=
-## DB host
-ENV PSQL_HOST=
-## DB post
-ENV PSQL_PORT=
-## DB SSL mode
-ENV PSQL_SSLMODE=prefer
-## DB user
-ENV PSQL_USER=
-## DB user password
-ENV PSQL_PASSWORD=
-## DB name
-ENV PSQL_DBNAME=
+### Examples
+
+#### Simple _psql_ call for _k8s_
+
+Assumes that config map, secrets and deployment objects are already created:
+
+```yaml
+---
+#
+# Job which runs init script
+#
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pgsql-init-sql
+  namespace: ns
+spec:
+  template:
+    spec:
+      volumes:
+      - name: init-sql
+        configMap:
+          name: pgsql-config
+      containers:
+      - name: pgsql-create-users
+        image: greuceanu/psql:latest
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pgsql-secrets
+              key: POSTGRES_PASSWORD
+        - name: PGUACD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pgsql-secrets
+              key: PGUACD_PASSWORD
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h pgsql -U postgres; do
+            sleep 1
+          done
+          psql "host=pgsql user=postgres password=$POSTGRES_PASSWORD" -f /mnt/init.sql
+        volumeMounts:
+        - name: init-sql
+          mountPath: /mnt
+      restartPolicy: OnFailure
+  backoffLimit: 4
 ```
-
-Using ```PSQL_CONNECTION_STRING``` will ignore the other connection parameters: ```PSQL_HOST```, ```PSQL_PORT```,
-```PSQL_SSLMODE```, ```PSQL_USER```, ```PSQL_PASSWORD``` and ```PSQL_DBNAME```.
 
 ## Building
 
